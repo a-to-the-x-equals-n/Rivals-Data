@@ -2,6 +2,11 @@
 brain.md
 .claude
 
+# Database
+db/.sql/
+db/.json/
+db/heroes.json
+
 # Python
 # Byte-compiled / optimized / DLL files
 __pycache__/
