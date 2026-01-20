@@ -30,18 +30,32 @@ python api.py
 This will:
 1. Load the API key from `.env`
 2. Make a GET request to `https://marvelrivalsapi.com/api/v1/heroes`
-3. Save the response to `heroes.json` in the current directory
+3. Save the response to `db/heroes.json`
+
+To split the hero data into individual JSON files:
+```bash
+python split_heroes.py
+```
+
+To initialize/refresh the SQLite database from the JSON files:
+```bash
+python db.py
+```
 
 ## Architecture
 
 ### Data Flow
-1. **api.py** - Main entry point that fetches hero data from the Marvel Rivals API and saves it to JSON
-2. **data/heroes.json** - Cached hero data containing comprehensive information about each hero including:
-   - Basic info (id, name, real_name, role, attack_type)
-   - Team affiliations
-   - Bio and lore
-   - Transformations (with health and movement speed stats)
-   - Costumes and abilities
+1. **api.py** - Fetches hero data from the Marvel Rivals API and saves to `db/heroes.json`
+2. **split_heroes.py** - Splits `db/heroes.json` into individual hero files in `db/.json/`
+3. **db.py** - Loads hero JSON files into SQLite database at `db/.sql/rivals.db`
+
+### Database Schema
+The SQLite database contains 5 tables:
+- **heroes** - Core hero info (id, name, real_name, role, attack_type, difficulty, bio, lore)
+- **hero_teams** - Hero team affiliations (many-to-many)
+- **transformations** - Hero forms with health and movement speed
+- **costumes** - Cosmetic variations
+- **abilities** - Hero abilities with damage and other stats stored in `additional_fields` JSON column
 
 ### API Structure
 - **Base URL**: `https://marvelrivalsapi.com/api/v1`
@@ -59,12 +73,17 @@ Hero objects contain:
 
 ```
 /
-├── api.py              # Main API client script
-├── data/
-│   └── heroes.json     # Cached hero data from API
+├── api.py              # Fetches hero data from API
+├── split_heroes.py     # Splits heroes.json into individual files
+├── db.py               # SQLite database loader
+├── db/
+│   ├── heroes.json     # Raw API response (gitignored)
+│   ├── .json/          # Individual hero JSON files (gitignored)
+│   └── .sql/
+│       └── rivals.db   # SQLite database (gitignored)
 ├── brain.md            # Personal notes (gitignored)
 ├── .env                # API credentials (gitignored)
 └── README.md           # Project documentation
 ```
 
-Note: `brain.md` is gitignored for personal notes and planning.
+Note: `brain.md` is gitignored for personal notes and planning. All files in `db/` are gitignored as they are generated from the API.
